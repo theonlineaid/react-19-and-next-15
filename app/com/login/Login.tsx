@@ -1,74 +1,66 @@
-"use client"
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface LoginData {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 const Login = () => {
-  const [loginData, setLoginData] = useState<LoginData>({ email: '', password: '' })
-  const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const router = useRouter()
+  const [loginData, setLoginData] = useState<LoginData>({
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setLoginData({
       ...loginData,
       [name]: value,
-    })
-  }
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    setLoading(true)
-    setError(null)
-    setSuccess(null)
-
-    let token
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        credentials: "include", // Include cookies
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(loginData),
-      })
+      });
 
       if (!res.ok) {
-        throw new Error('Invalid credentials')
+        const data = await res.json();
+        throw new Error(data?.message || "Invalid credentials");
       }
 
-      const data = await res.json()
-      console.log(data.token.accessToken)
-      setSuccess('Login successful!')
-      
-      // Assuming the token is in data.token
-      token = data.token.accessToken
-
-      // Store token in localStorage (or sessionStorage)
-      if (token) {
-        localStorage.setItem('authToken', token)
-      }
+      setSuccess("Login successful!");
 
       // Redirect to home or dashboard
-      router.push('/')
+      router.push("/");
 
       // Reset the form
-      setLoginData({ email: '', password: '' })
+      setLoginData({ email: "", password: "" });
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
@@ -105,15 +97,15 @@ const Login = () => {
         <button
           type="submit"
           className={`w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md ${
-            loading ? 'opacity-50 cursor-not-allowed' : ''
+            loading ? "opacity-50 cursor-not-allowed" : ""
           }`}
           disabled={loading}
         >
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
